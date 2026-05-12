@@ -8,7 +8,7 @@ const EditBook = () => {
 
     const [formData, setFormData] = useState({
         title: '', author: '', genre: '', description: '',
-        price: '', rentPrice: '', condition: '', location: ''
+        price: '', rentPrice: '', condition: '', location: '', quantity: 1
     });
     const [image,   setImage]   = useState(null);
     const [preview, setPreview] = useState(null);
@@ -26,7 +26,8 @@ const EditBook = () => {
                 title: b.title || '', author: b.author || '',
                 genre: b.genre || '', description: b.description || '',
                 price: b.price || '', rentPrice: b.rentPrice || '',
-                condition: b.condition || '', location: b.location || ''
+                condition: b.condition || '', location: b.location || '',
+                quantity: b.quantity || 1
             });
             setPreview(b.imageUrl || null);
         } catch { setError('Book not found.'); }
@@ -248,6 +249,12 @@ const EditBook = () => {
                                         <label className="eb-label">Price (₹)</label>
                                         <input className="eb-input" type="number" name="price" value={formData.price} onChange={handleChange} required />
                                     </div>
+                                    <div className="eb-group">
+                                        <label className="eb-label">Quantity</label>
+                                        <input className="eb-input" type="number" min="1" step="1" name="quantity" value={formData.quantity} onChange={handleChange} required />
+                                    </div>
+                                </div>
+                                <div className="eb-row">
                                     <div className="eb-group">
                                         <label className="eb-label">Rent (₹/day)</label>
                                         <input className="eb-input" type="number" name="rentPrice" value={formData.rentPrice} onChange={handleChange} />

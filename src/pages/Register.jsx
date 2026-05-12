@@ -232,6 +232,16 @@ const Register = () => {
     font-weight: 500;
 }
 
+.rg-check a {
+    color: #d4af37;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.rg-check a:hover {
+    text-decoration: underline;
+}
+
                 @media (max-width: 400px) {
                     .rg-row { grid-template-columns: 1fr; gap: 16px; }
                 }
@@ -305,7 +315,10 @@ const Register = () => {
         onChange={(e) => setAccepted(e.target.checked)}
     />
     <label htmlFor="terms">
-        I agree to the <span>Terms & Conditions</span>
+        I agree to the{' '}
+        <Link to="/terms" onClick={(e) => e.stopPropagation()}>
+            Terms & Conditions
+        </Link>
     </label>
     
                     <div className="rg-divider" />
