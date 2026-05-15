@@ -59,31 +59,46 @@ const TermsAndConditions = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,600;1,400&display=swap');
 
         .terms-page {
-          min-height: 100%;
-          padding: 48px 20px 80px;
+          min-height: 100vh;
+          padding: 96px 24px 86px;
           background:
-            radial-gradient(circle at top left, rgba(100, 216, 203, 0.16), transparent 32%),
-            radial-gradient(circle at top right, rgba(126, 184, 247, 0.14), transparent 28%),
-            linear-gradient(180deg, #060a12 0%, #08111d 100%);
-          color: rgba(255, 255, 255, 0.92);
-          font-family: 'DM Sans', sans-serif;
+            radial-gradient(ellipse at top, rgba(212, 175, 55, 0.1), transparent 46%),
+            linear-gradient(180deg, #000000 0%, #070707 58%, #000000 100%);
+          color: #ffffff;
+          font-family: 'Inter', sans-serif;
         }
 
         .terms-shell {
-          max-width: 980px;
+          max-width: 1060px;
           margin: 0 auto;
         }
 
         .terms-hero {
-          padding: clamp(32px, 5vw, 56px);
-          border-radius: 28px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(24px);
-          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+          position: relative;
+          overflow: hidden;
+          padding: clamp(34px, 5vw, 58px);
+          border-radius: 20px;
+          border: 1px solid rgba(212, 175, 55, 0.16);
+          background: #0a0a0a;
+          box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+        }
+
+        .terms-hero::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent 34%),
+            radial-gradient(circle at 88% 18%, rgba(212, 175, 55, 0.12), transparent 28%);
+          pointer-events: none;
+        }
+
+        .terms-hero-content {
+          position: relative;
+          max-width: 760px;
         }
 
         .terms-label {
@@ -91,22 +106,42 @@ const TermsAndConditions = () => {
           font-size: 11px;
           letter-spacing: 4px;
           text-transform: uppercase;
-          color: rgba(100, 216, 203, 0.7);
+          color: rgba(212, 175, 55, 0.82);
+          font-weight: 700;
         }
 
         .terms-title {
           margin: 0;
-          font-family: 'DM Serif Display', serif;
-          font-size: clamp(34px, 5vw, 58px);
-          line-height: 1.05;
+          font-family: 'Fraunces', serif;
+          font-size: clamp(36px, 6vw, 66px);
+          font-style: italic;
+          font-weight: 600;
+          line-height: 1.02;
+          letter-spacing: 0;
         }
 
         .terms-subtitle {
-          max-width: 700px;
           margin: 18px 0 0;
           font-size: 15px;
           line-height: 1.8;
-          color: rgba(255, 255, 255, 0.65);
+          color: rgba(255, 255, 255, 0.54);
+          font-weight: 300;
+        }
+
+        .terms-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 26px;
+        }
+
+        .terms-pill {
+          padding: 9px 13px;
+          border: 1px solid rgba(212, 175, 55, 0.13);
+          border-radius: 999px;
+          background: rgba(0, 0, 0, 0.3);
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 12px;
         }
 
         .terms-actions {
@@ -117,13 +152,15 @@ const TermsAndConditions = () => {
         }
 
         .terms-btn {
-          border-radius: 999px;
-          padding: 12px 20px;
+          border-radius: 10px;
+          padding: 13px 22px;
           font-size: 12px;
           letter-spacing: 1.5px;
           text-transform: uppercase;
           cursor: pointer;
-          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+          font-weight: 700;
+          font-family: 'Inter', sans-serif;
+          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
 
         .terms-btn:hover {
@@ -132,52 +169,91 @@ const TermsAndConditions = () => {
 
         .terms-btn-primary {
           border: none;
-          color: #061018;
-          background: linear-gradient(135deg, #64d8cb, #7eb8f7);
+          color: #000000;
+          background: #d4af37;
         }
 
         .terms-btn-secondary {
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          color: rgba(255, 255, 255, 0.88);
-          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(212, 175, 55, 0.22);
+          color: rgba(255, 255, 255, 0.82);
+          background: transparent;
+        }
+
+        .terms-btn-primary:hover {
+          background: #f1c40f;
+        }
+
+        .terms-btn-secondary:hover {
+          border-color: rgba(212, 175, 55, 0.48);
+          color: #ffffff;
         }
 
         .terms-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 18px;
-          margin-top: 28px;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 14px;
+          margin-top: 24px;
         }
 
         .terms-card {
+          position: relative;
           padding: 24px;
-          border-radius: 22px;
-          border: 1px solid rgba(255, 255, 255, 0.07);
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(18px);
+          border-radius: 14px;
+          border: 1px solid #1a1a1a;
+          background: #0a0a0a;
+          transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+        }
+
+        .terms-card:hover {
+          transform: translateY(-3px);
+          border-color: rgba(212, 175, 55, 0.28);
+          background: #0d0d0d;
+        }
+
+        .terms-card::before {
+          content: "";
+          position: absolute;
+          left: 24px;
+          top: 0;
+          width: 48px;
+          height: 2px;
+          background: #d4af37;
+          opacity: 0.75;
         }
 
         .terms-card h2 {
           margin: 0 0 12px;
-          font-family: 'DM Serif Display', serif;
-          font-size: 24px;
+          font-family: 'Fraunces', serif;
+          font-size: 21px;
+          font-weight: 600;
           color: #ffffff;
+          line-height: 1.25;
         }
 
         .terms-card p {
           margin: 0;
           font-size: 14px;
           line-height: 1.8;
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(255, 255, 255, 0.55);
+          font-weight: 300;
         }
 
         @media (max-width: 640px) {
           .terms-page {
-            padding: 28px 16px 56px;
+            padding: 82px 16px 56px;
           }
 
           .terms-hero {
-            border-radius: 22px;
+            border-radius: 16px;
+            padding: 30px 22px;
+          }
+
+          .terms-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .terms-btn {
+            width: 100%;
           }
         }
       `}</style>
@@ -185,26 +261,35 @@ const TermsAndConditions = () => {
       <section className="terms-page">
         <div className="terms-shell">
           <div className="terms-hero">
-            <p className="terms-label">Legal</p>
-            <h1 className="terms-title">Terms & Conditions</h1>
-            <p className="terms-subtitle">
-              These terms explain the rules for using BookNest, including how listings,
-              accounts, and user interactions are expected to work across the platform.
-            </p>
+            <div className="terms-hero-content">
+              <p className="terms-label">BookNest Legal</p>
+              <h1 className="terms-title">Terms & Conditions</h1>
+              <p className="terms-subtitle">
+                These terms outline the standards for accounts, listings, transactions,
+                and community conduct across BookNest. Please read them carefully before
+                buying, renting, exchanging, or listing books on the platform.
+              </p>
 
-            <div className="terms-actions">
-              <button
-                className="terms-btn terms-btn-primary"
-                onClick={() => navigate('/books')}
-              >
-                Explore Books
-              </button>
-              <button
-                className="terms-btn terms-btn-secondary"
-                onClick={() => navigate('/contact')}
-              >
-                Contact Us
-              </button>
+              <div className="terms-meta">
+                <span className="terms-pill">Marketplace rules</span>
+                <span className="terms-pill">User responsibilities</span>
+                <span className="terms-pill">Community safety</span>
+              </div>
+
+              <div className="terms-actions">
+                <button
+                  className="terms-btn terms-btn-primary"
+                  onClick={() => navigate('/books')}
+                >
+                  Explore Books
+                </button>
+                <button
+                  className="terms-btn terms-btn-secondary"
+                  onClick={() => navigate('/contact')}
+                >
+                  Contact Support
+                </button>
+              </div>
             </div>
           </div>
 
