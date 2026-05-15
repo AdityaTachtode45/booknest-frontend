@@ -51,13 +51,21 @@ const Navbar = () => {
       const unread = res.data.filter(t => t.reply && !t.seen).length;
       setUnreadCount(unread);
 
-    } catch {}
+    } catch {
+      setUnreadCount(0);
+    }
   };
 
   fetchUnread();
 }, []);
   /* Close mobile menu on route change */
-  useEffect(() => { setMenuOpen(false); setDropdownOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setMenuOpen(false);
+      setDropdownOpen(false);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [location.pathname]);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 

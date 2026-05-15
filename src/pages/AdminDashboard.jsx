@@ -54,7 +54,7 @@ const AdminDashboard = () => {
         if (!user) return;
         if (user.email !== ADMIN_EMAIL) { navigate('/'); return; }
         fetchAll();
-    }, [user]);
+    }, [user, navigate]);
 
     const getCoordinates = async (place) => {
         if (!place || place.trim() === '') return;
@@ -261,10 +261,12 @@ const AdminDashboard = () => {
 
             .ad {
                 min-height: 100vh;
-                background: #050505;
+                background:
+                    radial-gradient(ellipse at top, rgba(212,175,55,0.08), transparent 46%),
+                    linear-gradient(180deg, #000 0%, #060606 58%, #000 100%);
                 font-family: 'Inter', sans-serif;
                 color: #fff;
-                padding: 36px 28px 80px;
+                padding: 96px 28px 80px;
             }
 
             .ad-wrap { max-width: 1280px; margin: 0 auto; }
@@ -276,21 +278,24 @@ const AdminDashboard = () => {
                 margin-bottom: 32px;
                 flex-wrap: wrap;
                 gap: 16px;
-                padding-bottom: 24px;
-                border-bottom: 1px solid rgba(255,193,7,0.1);
+                padding: 26px;
+                border: 1px solid rgba(212,175,55,0.15);
+                border-radius: 18px;
+                background: #0a0a0a;
+                box-shadow: 0 24px 70px rgba(0,0,0,0.34);
             }
 
-            .ad-title { font-family:'Fraunces',serif; font-size:32px; color:#fff; line-height:1; }
-            .ad-title span { color:#ffc107; }
-            .ad-subtitle { font-size:12px; color:rgba(255,255,255,0.3); margin-top:4px; }
+            .ad-title { font-family:'Fraunces',serif; font-size:34px; color:#fff; line-height:1; font-style:italic; letter-spacing:0; }
+            .ad-title span { color:#d4af37; }
+            .ad-subtitle { font-size:12px; color:rgba(255,255,255,0.42); margin-top:8px; }
 
             .ad-tabs {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 4px;
-                background: #111;
-                border: 1px solid rgba(255,193,7,0.15);
-                border-radius: 8px;
+                background: #050505;
+                border: 1px solid rgba(212,175,55,0.16);
+                border-radius: 12px;
                 padding: 4px;
             }
 
@@ -298,18 +303,18 @@ const AdminDashboard = () => {
                 padding: 8px 16px;
                 background: transparent;
                 border: none;
-                border-radius: 5px;
-                color: rgba(255,255,255,0.5);
+                border-radius: 8px;
+                color: rgba(255,255,255,0.58);
                 cursor: pointer;
-                font-size: 13px;
+                font-size: 12px;
                 font-family: 'Inter', sans-serif;
-                font-weight: 500;
+                font-weight: 700;
                 transition: all 0.15s;
                 white-space: nowrap;
             }
 
-            .ad-tab:hover { color:#fff; background:rgba(255,193,7,0.08); }
-            .ad-tab.act { background:#ffc107; color:#000; font-weight:600; }
+            .ad-tab:hover { color:#fff; background:rgba(212,175,55,0.08); }
+            .ad-tab.act { background:#d4af37; color:#000; font-weight:800; }
 
             .ad-err {
                 background: rgba(255,80,80,0.08);
@@ -351,7 +356,7 @@ const AdminDashboard = () => {
             .ad-dot {
                 width:9px; height:9px;
                 border-radius:50%;
-                background:#ffc107;
+                background:#d4af37;
                 display:inline-block;
                 animation: adBounce 1.2s ease-in-out infinite;
             }
@@ -366,27 +371,27 @@ const AdminDashboard = () => {
             }
 
             .ad-stat {
-                background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-                border: 1px solid rgba(255,193,7,0.15);
-                border-radius: 16px;
+                background: #0a0a0a;
+                border: 1px solid rgba(212,175,55,0.14);
+                border-radius: 14px;
                 padding: 24px 20px;
                 text-align: center;
                 transition: transform 0.25s ease, border-color 0.2s, box-shadow 0.25s ease;
                 box-shadow: 0 18px 42px rgba(0,0,0,0.16);
                 animation: statFade 0.9s ease both;
             }
-            .ad-stat:hover { border-color: rgba(255,193,7,0.35); transform: translateY(-3px); box-shadow: 0 24px 54px rgba(0,0,0,0.22); }
+            .ad-stat:hover { border-color: rgba(212,175,55,0.34); transform: translateY(-3px); box-shadow: 0 24px 54px rgba(0,0,0,0.22); }
 
-            .ad-stat-num { font-size:30px; font-weight:600; color:#ffc107; line-height:1; }
-            .ad-stat-label { font-size:11px; color:rgba(255,255,255,0.35); margin-top:6px; text-transform:uppercase; letter-spacing:0.06em; }
+            .ad-stat-num { font-size:30px; font-weight:700; color:#d4af37; line-height:1; }
+            .ad-stat-label { font-size:11px; color:rgba(255,255,255,0.4); margin-top:8px; text-transform:uppercase; letter-spacing:0.06em; }
 
             .ad-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
             @media(max-width:720px){ .ad-charts { grid-template-columns:1fr; } }
 
             .ad-chart {
-                background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-                border: 1px solid rgba(255,193,7,0.14);
-                border-radius: 16px;
+                background: #0a0a0a;
+                border: 1px solid rgba(212,175,55,0.13);
+                border-radius: 14px;
                 padding: 20px;
                 box-shadow: 0 16px 40px rgba(0,0,0,0.18);
                 animation: chartEntrance 0.9s ease-out both;
@@ -398,14 +403,13 @@ const AdminDashboard = () => {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background: radial-gradient(circle at top left, rgba(255,193,7,0.12), transparent 28%),
-                            radial-gradient(circle at bottom right, rgba(59,130,246,0.12), transparent 26%);
+                background: radial-gradient(circle at top left, rgba(212,175,55,0.1), transparent 30%);
                 pointer-events: none;
             }
 
             .ad-chart-title {
                 font-size:12px; font-weight:600;
-                color:#ffe082;
+                color:#d4af37;
                 text-transform:uppercase; letter-spacing:0.08em;
                 margin-bottom:16px;
                 position: relative;
@@ -682,7 +686,14 @@ const AdminDashboard = () => {
                             { key:'messages',  label:'✉️ Messages'  },
                         ].map(({ key, label }) => (
                             <button key={key} className={`ad-tab${tab === key ? ' act' : ''}`} onClick={() => setTab(key)}>
-                                {label}
+                                {{
+                                    analytics: 'Analytics',
+                                    users: 'Users',
+                                    books: 'Books',
+                                    orders: 'Orders',
+                                    delivery: 'Delivery',
+                                    messages: 'Messages',
+                                }[key] || label}
                             </button>
                         ))}
                     </div>
