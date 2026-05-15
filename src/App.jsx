@@ -991,6 +991,169 @@ const Home = () => {
 };
 
 /* ══════════════ APP SHELL ════════════════════════════════ */
+const BookNestAlert = () => {
+    const [alertData, setAlertData] = useState(null);
+    const closeButtonRef = useRef(null);
+
+    useEffect(() => {
+        const nativeAlert = window.alert;
+
+        window.alert = (message = '') => {
+            const text = String(message);
+            const lower = text.toLowerCase();
+            const type = lower.includes('failed') || lower.includes('not found') || lower.includes('error') || lower.includes('wrong')
+                ? 'error'
+                : 'success';
+
+            setAlertData({ id: Date.now(), message: text, type });
+        };
+
+        return () => {
+            window.alert = nativeAlert;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!alertData) return undefined;
+
+        closeButtonRef.current?.focus();
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' || e.key === 'Enter') setAlertData(null);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [alertData]);
+
+    if (!alertData) return null;
+
+    const isError = alertData.type === 'error';
+
+    return (
+        <div
+            role="presentation"
+            onMouseDown={() => setAlertData(null)}
+            style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 10000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px',
+                background: 'rgba(0,0,0,.72)',
+                backdropFilter: 'blur(10px)',
+                animation: 'bnAlertFade .18s ease both',
+            }}
+        >
+            <style>{`
+                @keyframes bnAlertFade { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes bnAlertPop {
+                    from { opacity: 0; transform: translateY(10px) scale(.96); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                .bn-alert-card {
+                    width: min(420px, 100%);
+                    background: #0a0a0a;
+                    border: 1px solid rgba(212,175,55,.32);
+                    border-radius: 18px;
+                    box-shadow: 0 30px 90px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.03) inset;
+                    color: #fff;
+                    font-family: 'Inter', sans-serif;
+                    overflow: hidden;
+                    animation: bnAlertPop .22s cubic-bezier(.2,.8,.2,1) both;
+                }
+                .bn-alert-card::before {
+                    content: "";
+                    display: block;
+                    height: 3px;
+                    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+                }
+                .bn-alert-ok:hover { background: #f1c40f; transform: translateY(-1px); }
+            `}</style>
+
+            <div
+                className="bn-alert-card"
+                role="dialog"
+                aria-modal="true"
+                aria-live="assertive"
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+                <div style={{ padding: '28px 28px 24px', textAlign: 'center' }}>
+                    <div
+                        style={{
+                            width: '54px',
+                            height: '54px',
+                            borderRadius: '50%',
+                            margin: '0 auto 18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: isError ? 'rgba(255,69,58,.1)' : 'rgba(212,175,55,.12)',
+                            border: `1px solid ${isError ? 'rgba(255,69,58,.4)' : 'rgba(212,175,55,.35)'}`,
+                            color: isError ? '#ff6b61' : '#d4af37',
+                            fontSize: '24px',
+                            fontWeight: 700,
+                        }}
+                    >
+                        {isError ? '!' : 'OK'}
+                    </div>
+
+                    <p
+                        style={{
+                            marginBottom: '8px',
+                            fontSize: '10px',
+                            letterSpacing: '3px',
+                            textTransform: 'uppercase',
+                            color: isError ? 'rgba(255,107,97,.7)' : 'rgba(212,175,55,.72)',
+                        }}
+                    >
+                        {isError ? 'Needs Attention' : 'BookNest'}
+                    </p>
+
+                    <div
+                        style={{
+                            fontFamily: "'Fraunces', serif",
+                            fontSize: 'clamp(22px, 4vw, 28px)',
+                            fontStyle: 'italic',
+                            lineHeight: 1.25,
+                            color: '#fff',
+                            overflowWrap: 'anywhere',
+                        }}
+                    >
+                        {alertData.message.replace(/[✅❌]/g, '').trim() || 'Done'}
+                    </div>
+
+                    <button
+                        ref={closeButtonRef}
+                        className="bn-alert-ok"
+                        type="button"
+                        onClick={() => setAlertData(null)}
+                        style={{
+                            minWidth: '118px',
+                            marginTop: '24px',
+                            padding: '12px 24px',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background: '#d4af37',
+                            color: '#000',
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            letterSpacing: '1.4px',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer',
+                            transition: '.2s',
+                        }}
+                    >
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const App = () => {
     const { user } = useAuth();
     return (
@@ -1021,6 +1184,7 @@ const App = () => {
                 </Routes>
             </main>
             <Footer />
+            <BookNestAlert />
         </div>
     );
 };
