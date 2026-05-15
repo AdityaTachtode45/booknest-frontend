@@ -19,13 +19,13 @@ const API = API_BASE_URL;
 const ADMIN_EMAIL = 'adityanamdevtachtode@gmail.com';
 
 const statusStyle = {
-    PENDING:          { bg:'rgba(160,120,40,0.1)',  color:'#a07828',              border:'rgba(160,120,40,0.25)'  },
-    CONFIRMED:        { bg:'rgba(74,127,165,0.1)',  color:'#4a7fa5',              border:'rgba(74,127,165,0.25)'  },
-    SHIPPED:          { bg:'rgba(122,104,168,0.1)', color:'#7a68a8',              border:'rgba(122,104,168,0.25)' },
-    DELIVERED:        { bg:'rgba(80,140,80,0.1)',   color:'#4a8c4a',              border:'rgba(80,140,80,0.25)'   },
-    CANCELLED:        { bg:'rgba(180,60,50,0.08)',  color:'rgba(180,60,50,0.75)', border:'rgba(180,60,50,0.2)'    },
-    PROCESSING:       { bg:'rgba(160,120,40,0.1)',  color:'#a07828',              border:'rgba(160,120,40,0.25)'  },
-    OUT_FOR_DELIVERY: { bg:'rgba(122,104,168,0.1)', color:'#7a68a8',              border:'rgba(122,104,168,0.25)' },
+    PENDING:          { bg:'rgba(212,175,55,0.11)', color:'#d4af37',              border:'rgba(212,175,55,0.28)'  },
+    CONFIRMED:        { bg:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,.78)', border:'rgba(255,255,255,0.14)' },
+    SHIPPED:          { bg:'rgba(212,175,55,0.08)', color:'#c89a32',              border:'rgba(212,175,55,0.2)'   },
+    DELIVERED:        { bg:'rgba(80,160,100,0.1)', color:'#5ab85a',               border:'rgba(80,160,100,0.22)'  },
+    CANCELLED:        { bg:'rgba(255,69,58,0.08)', color:'#ff6b61',               border:'rgba(255,69,58,0.2)'    },
+    PROCESSING:       { bg:'rgba(212,175,55,0.11)', color:'#d4af37',              border:'rgba(212,175,55,0.28)'  },
+    OUT_FOR_DELIVERY: { bg:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,.78)', border:'rgba(255,255,255,0.14)' },
 };
 
 const DELIVERY_STATUSES = ['PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
         labels: ['Available','Sold','Rented','Exchanged'],
         datasets: [{
             data:[analytics?.availableBooks||0,analytics?.soldBooks||0,analytics?.rentedBooks||0,analytics?.exchangedBooks||0],
-            backgroundColor:['#ffbe0b','#fb5607','#8338ec','#3a86ff'],
+            backgroundColor:['#d4af37','#8f7324','#4f4a3a','#ffffff'],
             hoverOffset:18,
             borderWidth:0,
         }]
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
         datasets: [{
             label:'Orders',
             data:[analytics?.pendingOrders||0,analytics?.deliveredOrders||0,(analytics?.totalOrders||0)-(analytics?.pendingOrders||0)-(analytics?.deliveredOrders||0)],
-            backgroundColor:['#ff6b6b','#00d2d3','#ff9f1c'],
+            backgroundColor:['#d4af37','#5ab85a','#6f6f6f'],
             borderRadius:14,
             borderSkipped:false,
         }]
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
         labels: Object.keys(bookTypeCounts),
         datasets: [{
             data: Object.values(bookTypeCounts),
-            backgroundColor:['#ff6b6b','#3b3b98','#0abde3','#10ac84','#f368e0','#ff9f43'],
+            backgroundColor:['#d4af37','#b8942f','#7b6427','#4f4a3a','#8a8a8a','#ffffff'],
             hoverOffset:16,
             borderWidth:0,
         }]
@@ -193,7 +193,7 @@ const AdminDashboard = () => {
         datasets: [{
             label:'Revenue',
             data: Object.values(orderRevenueByStatus),
-            backgroundColor:['#ff9f43','#ee5253','#1dd1a1','#5f27cd','#54a0ff'].slice(0, Object.keys(orderRevenueByStatus).length),
+            backgroundColor:['#d4af37','#b8942f','#8f7324','#6f6f6f','#ffffff'].slice(0, Object.keys(orderRevenueByStatus).length),
             borderRadius:14,
             borderSkipped:false,
         }]

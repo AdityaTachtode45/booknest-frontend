@@ -6,7 +6,7 @@ import { API_ROOT } from '../config/api';
 
 const NAV_LINKS = [
   { label: 'Browse',       path: '/books',        auth: false },
-  { label: '+ Post Book',  path: '/add-book',     auth: true  },
+  { label: 'Post Book',    path: '/add-book',     auth: true  },
   { label: 'My Books',     path: '/my-books',     auth: true  },
   { label: 'My Orders',    path: '/my-orders',    auth: true  },
   { label: 'Exchanges',    path: '/my-exchanges', auth: true  },
@@ -473,6 +473,242 @@ const Navbar = () => {
   color: #0a6a8b !important;
 }
 `}</style>
+<style>{`
+/* Final BookNest navigation polish */
+.nv-root {
+  font-family: 'Inter', sans-serif !important;
+}
+
+.nv-root.top {
+  background: linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,.56) 74%, transparent) !important;
+}
+
+.nv-root.scrolled {
+  background: rgba(5,5,5,.92) !important;
+  border-bottom: 1px solid rgba(212,175,55,.16) !important;
+  box-shadow: 0 18px 42px rgba(0,0,0,.42) !important;
+}
+
+.nv-bar {
+  height: 68px !important;
+  gap: 22px !important;
+}
+
+.nv-root.scrolled .nv-bar {
+  height: 60px !important;
+}
+
+.nv-brand-dot {
+  width: 8px !important;
+  height: 8px !important;
+  background: #d4af37 !important;
+  box-shadow: 0 0 18px rgba(212,175,55,.72) !important;
+}
+
+.nv-brand-text,
+.nv-brand-text em {
+  font-family: 'Fraunces', serif !important;
+  font-style: italic !important;
+  color: #ffffff !important;
+  -webkit-text-stroke: 0 transparent !important;
+}
+
+.nv-brand-text {
+  font-size: 25px !important;
+  letter-spacing: 0 !important;
+}
+
+.nv-brand-text em {
+  color: #d4af37 !important;
+}
+
+.nv-links {
+  gap: 4px !important;
+  margin-left: 16px !important;
+}
+
+.nv-link {
+  color: rgba(255,255,255,.66) !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  padding: 8px 11px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .2px !important;
+}
+
+.nv-link:hover,
+.nv-link.active {
+  color: #ffffff !important;
+  background: rgba(212,175,55,.09) !important;
+  border-color: rgba(212,175,55,.14) !important;
+}
+
+.nv-link.active::after {
+  width: 18px !important;
+  background: #d4af37 !important;
+}
+
+.nv-avatar,
+.nv-admin-badge,
+.nv-btn-login,
+.nv-btn-register {
+  border-radius: 10px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.nv-avatar {
+  background: #0a0a0a !important;
+  border: 1px solid rgba(212,175,55,.16) !important;
+  padding: 6px 11px 6px 6px !important;
+}
+
+.nv-avatar:hover {
+  background: rgba(212,175,55,.08) !important;
+  border-color: rgba(212,175,55,.34) !important;
+}
+
+.nv-avatar-circle {
+  background: #d4af37 !important;
+  color: #000 !important;
+  font-weight: 800 !important;
+}
+
+.nv-avatar-name {
+  color: rgba(255,255,255,.84) !important;
+}
+
+.nv-avatar-caret {
+  color: rgba(212,175,55,.72) !important;
+}
+
+.nv-admin-badge {
+  position: relative !important;
+  background: rgba(212,175,55,.1) !important;
+  border: 1px solid rgba(212,175,55,.25) !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  padding: 8px 13px !important;
+}
+
+.nv-admin-badge::after {
+  content: "Admin";
+  color: #d4af37;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.nv-admin-badge:hover {
+  background: rgba(212,175,55,.17) !important;
+}
+
+.nv-dropdown {
+  background: #0a0a0a !important;
+  border: 1px solid rgba(212,175,55,.18) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.55) !important;
+}
+
+.nv-dropdown-item {
+  color: rgba(255,255,255,.68) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.nv-dropdown-item:hover {
+  background: rgba(212,175,55,.08) !important;
+  color: #ffffff !important;
+}
+
+.nv-dropdown-divider {
+  background: rgba(212,175,55,.12) !important;
+}
+
+.nv-dropdown-item.danger {
+  color: rgba(255,107,97,.86) !important;
+}
+
+.nv-dropdown-item.danger:hover {
+  background: rgba(255,69,58,.1) !important;
+  color: #ff6b61 !important;
+}
+
+.nv-dropdown .nv-dropdown-item:nth-child(1),
+.nv-dropdown .nv-dropdown-item:nth-child(2),
+.nv-dropdown .nv-dropdown-item:nth-child(3),
+.nv-dropdown .nv-dropdown-item.danger {
+  font-size: 0 !important;
+}
+
+.nv-dropdown .nv-dropdown-item:nth-child(1)::after,
+.nv-dropdown .nv-dropdown-item:nth-child(2)::after,
+.nv-dropdown .nv-dropdown-item:nth-child(3)::after,
+.nv-dropdown .nv-dropdown-item.danger::after {
+  font-size: 13px;
+}
+
+.nv-dropdown .nv-dropdown-item:nth-child(1)::after { content: "My Orders"; }
+.nv-dropdown .nv-dropdown-item:nth-child(2)::after { content: "My Books"; }
+.nv-dropdown .nv-dropdown-item:nth-child(3)::after { content: "My Exchanges"; }
+.nv-dropdown .nv-dropdown-item.danger::after { content: "Logout"; }
+
+.nv-dropdown-item span:first-child {
+  font-size: 0 !important;
+}
+
+.nv-dropdown-item span:first-child::after {
+  content: "My Tickets";
+  font-size: 13px;
+}
+
+.nv-btn-login {
+  color: rgba(255,255,255,.82) !important;
+  border: 1px solid rgba(212,175,55,.26) !important;
+  background: transparent !important;
+}
+
+.nv-btn-login:hover {
+  color: #ffffff !important;
+  background: rgba(212,175,55,.08) !important;
+}
+
+.nv-btn-register {
+  background: #d4af37 !important;
+  color: #000000 !important;
+  box-shadow: 0 10px 24px rgba(212,175,55,.16) !important;
+  font-weight: 800 !important;
+}
+
+.nv-btn-register:hover {
+  background: #f1c40f !important;
+}
+
+.nv-hamburger {
+  border: 1px solid rgba(212,175,55,.18) !important;
+  border-radius: 10px !important;
+}
+
+.nv-hamburger span {
+  background: #d4af37 !important;
+}
+
+.nv-drawer {
+  background: rgba(5,5,5,.98) !important;
+  border-top: 1px solid rgba(212,175,55,.14) !important;
+}
+
+.nv-drawer-link {
+  color: rgba(255,255,255,.72) !important;
+  border-bottom: 1px solid rgba(212,175,55,.08) !important;
+}
+
+.nv-drawer-link:hover,
+.nv-drawer-link.active {
+  color: #d4af37 !important;
+}
+`}</style>
 
       <nav className={`nv-root ${scrolled ? 'scrolled' : 'top'}`} role="navigation" aria-label="Main navigation">
         <div className="nv-bar">
@@ -492,7 +728,7 @@ const Navbar = () => {
                 onClick={() => navigate(path)}
                 aria-current={isActive(path) ? 'page' : undefined}
               >
-                {label}
+                {path === '/leaderboard' ? 'Leaderboard' : label}
               </button>
             ))}
           </div>
@@ -552,8 +788,8 @@ const Navbar = () => {
 
   {unreadCount > 0 && (
     <span style={{
-      background: "red",
-      color: "white",
+      background: "#d4af37",
+      color: "#000",
       borderRadius: "50%",
       padding: "2px 8px",
       fontSize: "12px"
@@ -599,7 +835,7 @@ const Navbar = () => {
               onClick={() => navigate(path)}
               role="menuitem"
             >
-              {label}
+              {path === '/leaderboard' ? 'Leaderboard' : label}
             </button>
           ))}
           {!user && (
