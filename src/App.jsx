@@ -244,7 +244,7 @@ const Home = () => {
             --amber-dim: rgba(255,193,7,0.4);
             --amber-glow: rgba(255,193,7,0.12);
             --white:    rgba(255,255,255,0.92);
-            --muted:    rgba(255,255,255,0.45);
+            --muted:    rgba(255,255,255,0.64);
             --dim:      rgba(255,255,255,0.18);
         }
 
@@ -378,6 +378,16 @@ const Home = () => {
         .hn-stat-cell:hover .hn-stat-image { transform: scale(1.08); opacity: .42; }
         .hn-stat-cell:hover .hn-stat-chip { background: rgba(255,193,7,.18); color: #FFC107; }
 
+        .hn-image-panel {
+            transition: transform .32s cubic-bezier(.23,1,.32,1), border-color .25s, box-shadow .3s;
+        }
+        .hn-image-panel:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,193,7,.28) !important;
+            box-shadow: 0 26px 60px rgba(0,0,0,.55), 0 0 36px rgba(255,193,7,.06);
+        }
+        .hn-image-panel:hover .hn-image-panel-bg { transform: scale(1.08); opacity: .72; }
+
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: rgba(255,193,7,0.2); border-radius: 2px; }
@@ -474,8 +484,8 @@ const Home = () => {
                                         backgroundClip: 'text',
                                         animation: 'shimmer 5s linear infinite',
                                     }}>{user.name || user.username || 'Reader'}</span>
-                                    <span style={{ display: 'block', color: 'rgba(255,255,255,.88)' }}>Your shelf</span>
-                                    <span style={{ display: 'block', fontStyle: 'italic', color: 'rgba(255,255,255,.25)', fontWeight: '400' }}>awaits.</span>
+                                    <span style={{ display: 'block', color: 'rgba(255,255,255,.94)' }}>Your shelf</span>
+                                    <span style={{ display: 'block', fontStyle: 'italic', color: 'rgba(255,255,255,.62)', fontWeight: '400' }}>awaits.</span>
                                 </>
                             ) : (
                                 <>
@@ -487,15 +497,15 @@ const Home = () => {
                                         backgroundClip: 'text',
                                         animation: 'shimmer 5s linear infinite',
                                     }}>Every book</span>
-                                    <span style={{ display: 'block', color: 'rgba(255,255,255,.88)' }}>deserves</span>
-                                    <span style={{ display: 'block', fontStyle: 'italic', color: 'rgba(255,255,255,.25)', fontWeight: '400' }}>a new reader.</span>
+                                    <span style={{ display: 'block', color: 'rgba(255,255,255,.94)' }}>deserves</span>
+                                    <span style={{ display: 'block', fontStyle: 'italic', color: 'rgba(255,255,255,.62)', fontWeight: '400' }}>a new reader.</span>
                                 </>
                             )}
                         </h1>
 
                         <p style={{
                             fontSize: '15px', fontWeight: '300',
-                            color: 'rgba(255,255,255,.38)', lineHeight: '1.9',
+                            color: 'rgba(255,255,255,.68)', lineHeight: '1.9',
                             maxWidth: '400px', marginBottom: '44px',
                         }}>
                             {feat?.desc || 'Discover, trade and exchange pre-loved books with a community that lives and breathes literature.'}
@@ -542,7 +552,7 @@ const Home = () => {
                                         }}><Counter to={s.val} /></div>
                                         <div style={{
                                             fontSize: '10px', letterSpacing: '2.5px',
-                                            textTransform: 'uppercase', color: 'rgba(255,255,255,.2)',
+                                            textTransform: 'uppercase', color: 'rgba(255,255,255,.5)',
                                             marginTop: '6px',
                                         }}>{s.label}</div>
                                     </div>
@@ -617,10 +627,10 @@ const Home = () => {
                                     <h3 style={{
                                         fontFamily: "'Fraunces',serif", fontSize: '19px',
                                         fontStyle: 'italic', lineHeight: '1.25', marginBottom: '5px',
-                                        color: 'rgba(255,255,255,.9)',
+                                        color: 'rgba(255,255,255,.96)',
                                     }}>{feat.title}</h3>
                                     {feat.author && (
-                                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.3)', marginBottom: '14px', fontWeight: '300' }}>
+                                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.56)', marginBottom: '14px', fontWeight: '300' }}>
                                             by {feat.author}
                                         </p>
                                     )}
@@ -662,7 +672,7 @@ const Home = () => {
                                     }}>📦</div>
                                     <div>
                                         <div style={{ fontFamily: "'Fraunces',serif", fontSize: '22px', lineHeight: 1, color: '#FFC107' }}>{stats.orders ?? 0}</div>
-                                        <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: '3px' }}>Orders</div>
+                                        <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginTop: '3px' }}>Orders</div>
                                     </div>
                                 </div>
 
@@ -681,7 +691,7 @@ const Home = () => {
                                     }}>🌿</div>
                                     <div>
                                         <div style={{ fontFamily: "'Fraunces',serif", fontSize: '22px', lineHeight: 1, color: '#FFC107' }}>{stats.clubs ?? 0}</div>
-                                        <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: '3px' }}>Clubs</div>
+                                        <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginTop: '3px' }}>Clubs</div>
                                     </div>
                                 </div>
                             </>
@@ -784,7 +794,7 @@ const Home = () => {
                                     <span style={{ fontSize: '14px' }}>{g.emoji}</span>
                                     {g.name}
                                     <span style={{
-                                        fontSize: '11px', color: 'rgba(255,255,255,.2)',
+                                        fontSize: '11px', color: 'rgba(255,255,255,.58)',
                                         background: 'rgba(255,255,255,.05)',
                                         padding: '1px 8px', borderRadius: '100px',
                                     }}>{g.count}</span>
@@ -795,10 +805,39 @@ const Home = () => {
                 </section>
 
                 {/* ════════ BOOKS GRID ════════ */}
+                <section style={{ position: 'relative', zIndex: 10, padding: '0 clamp(36px,6vw,96px) 72px', animation: 'fadeUp .7s .28s ease both' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '14px' }}>
+                        {[
+                            { title: 'Find stories worth keeping', text: 'Browse shelves shaped by real readers, not endless noise.', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1100&q=75' },
+                            { title: 'Trade, collect, repeat', text: 'Give finished books a second life with someone nearby.', image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=75' },
+                            { title: 'Build your reading circle', text: 'Join clubs and discover what people around you are reading.', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=75' },
+                        ].map((item, i) => (
+                            <div className="hn-image-panel" key={item.title} style={{
+                                position: 'relative', minHeight: i === 0 ? '360px' : '280px',
+                                borderRadius: '18px', border: '1px solid rgba(255,255,255,.08)',
+                                overflow: 'hidden', padding: '28px', display: 'flex',
+                                alignItems: 'flex-end', background: '#0a0a0a',
+                            }}>
+                                <div className="hn-image-panel-bg" style={{
+                                    position: 'absolute', inset: 0,
+                                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,.88)), url(${item.image})`,
+                                    backgroundSize: 'cover', backgroundPosition: 'center',
+                                    opacity: .62, transition: 'transform .55s ease, opacity .3s ease',
+                                }}/>
+                                <div style={{ position: 'relative', maxWidth: '380px' }}>
+                                    <div style={{ fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(255,193,7,.72)', marginBottom: '10px' }}>BookNest</div>
+                                    <h3 style={{ fontFamily: "'Fraunces',serif", fontSize: 'clamp(24px,3vw,42px)', fontStyle: 'italic', color: 'rgba(255,255,255,.96)', lineHeight: 1.08, marginBottom: '10px' }}>{item.title}</h3>
+                                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.68)', lineHeight: 1.75 }}>{item.text}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 <section style={{ position: 'relative', zIndex: 10, padding: '0 clamp(36px,6vw,96px) 72px', animation: 'fadeUp .7s .3s ease both' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                         <div>
-                            <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.35)', marginBottom: '10px' }}>Catalogue</p>
+                            <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.55)', marginBottom: '10px' }}>Catalogue</p>
                             <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 'clamp(28px,4vw,44px)', fontStyle: 'italic', color: 'var(--white)', lineHeight: 1.1 }}>All Books</h2>
                         </div>
                         <button className="hn-btn-outline" onClick={() => nav('/books')} style={{
@@ -867,12 +906,12 @@ const Home = () => {
                                             color: 'var(--white)', marginBottom: '3px', lineHeight: '1.3',
                                             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                                         }}>{bk.title}</h4>
-                                        {bk.author && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', marginBottom: '12px', fontWeight: '300' }}>{bk.author}</p>}
+                                        {bk.author && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.58)', marginBottom: '12px', fontWeight: '300' }}>{bk.author}</p>}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             {bk.price != null ? (
                                                 <span style={{ fontFamily: "'Fraunces',serif", fontSize: '20px', color: '#FFC107' }}>₹{bk.price}</span>
                                             ) : <span/>}
-                                            {bk.genre && <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.18)' }}>{bk.genre}</span>}
+                                            {bk.genre && <span style={{ fontSize: '11px', color: 'rgba(126,184,247,.62)' }}>{bk.genre}</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -885,7 +924,7 @@ const Home = () => {
                 <section style={{ position: 'relative', zIndex: 10, padding: '0 clamp(36px,6vw,96px) 72px', animation: 'fadeUp .7s .35s ease both' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                         <div>
-                            <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.35)', marginBottom: '10px' }}>Community</p>
+                            <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.55)', marginBottom: '10px' }}>Community</p>
                             <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 'clamp(28px,4vw,44px)', fontStyle: 'italic', color: 'var(--white)', lineHeight: 1.1 }}>Book Clubs</h2>
                         </div>
                         <button className="hn-btn-outline" onClick={() => nav('/clubs')} style={{
