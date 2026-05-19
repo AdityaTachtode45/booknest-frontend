@@ -322,15 +322,61 @@ const Home = () => {
         }
 
         .hn-rv-card {
-            transition: transform .25s, border-color .25s;
+            isolation: isolate;
+            transition: transform .28s cubic-bezier(.23,1,.32,1), border-color .25s, box-shadow .28s, background .25s;
         }
         .hn-rv-card:hover {
-            transform: translateY(-6px) !important;
-            border-color: rgba(255,193,7,0.18) !important;
+            transform: translateY(-7px) !important;
+            border-color: rgba(255,193,7,0.32) !important;
+            box-shadow: 0 22px 55px rgba(0,0,0,.5), 0 0 38px rgba(255,193,7,.055) !important;
+        }
+        .hn-rv-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                linear-gradient(135deg, rgba(255,193,7,.14), transparent 34%),
+                radial-gradient(circle at 92% 8%, rgba(126,184,247,.12), transparent 32%);
+            opacity: .55;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .hn-rv-card::after {
+            content: "";
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,193,7,.38), transparent);
+            opacity: .65;
+        }
+        .hn-rv-stars span {
+            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,.035);
+        }
+        .hn-rv-card:hover .hn-rv-stars span {
+            background: rgba(255,193,7,.08);
         }
 
-        .hn-stat-cell { transition: background .2s; cursor: default; }
-        .hn-stat-cell:hover { background: rgba(255,255,255,0.03) !important; }
+        .hn-stat-cell {
+            min-height: 168px;
+            transition: transform .28s cubic-bezier(.23,1,.32,1), border-color .25s, box-shadow .28s;
+            cursor: default;
+        }
+        .hn-stat-cell:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,193,7,.32) !important;
+            box-shadow: 0 22px 48px rgba(0,0,0,.45), 0 0 34px rgba(255,193,7,.06);
+        }
+        .hn-stat-cell:hover .hn-stat-image { transform: scale(1.08); opacity: .42; }
+        .hn-stat-cell:hover .hn-stat-chip { background: rgba(255,193,7,.18); color: #FFC107; }
 
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #000; }
@@ -648,13 +694,9 @@ const Home = () => {
                     <section style={{
                         position: 'relative', zIndex: 10,
                         margin: '0 clamp(36px,6vw,96px) 72px',
-                        borderRadius: '18px',
-                        background: '#0a0a0a',
-                        border: '1px solid #1a1a1a',
-                        overflow: 'hidden',
                         animation: 'fadeUp .7s .2s ease both',
                     }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '12px' }}>
                             {[
                                 { icon: '📚', label: 'Books',   val: stats.books  },
                                 { icon: '👥', label: 'Readers', val: stats.users  },
@@ -663,16 +705,54 @@ const Home = () => {
                                 { icon: '🌿', label: 'Clubs',   val: stats.clubs  },
                             ].map((s, i) => (
                                 <div className="hn-stat-cell" key={i} style={{
-                                    padding: '36px 20px', textAlign: 'center',
-                                    borderRight: i < 4 ? '1px solid #1a1a1a' : 'none',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(255,255,255,.08)',
+                                    background: '#0a0a0a',
+                                    padding: '24px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
                                 }}>
-                                    <div style={{ fontSize: '18px', marginBottom: '10px', opacity: .5 }}>{s.icon}</div>
+                                    <div className="hn-stat-image" style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.92)), url(${{
+                                            Books: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=700&q=70',
+                                            Readers: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=70',
+                                            Trades: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=700&q=70',
+                                            Orders: 'https://images.unsplash.com/photo-1607082350899-7e105aa886ae?auto=format&fit=crop&w=700&q=70',
+                                            Clubs: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=700&q=70',
+                                        }[s.label]})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        opacity: .32,
+                                        transition: 'transform .45s ease, opacity .3s ease',
+                                    }}/>
+                                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 0%, rgba(255,193,7,.16), transparent 38%)' }}/>
+                                    <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '34px' }}>
+                                        <span className="hn-stat-chip" style={{
+                                            borderRadius: '999px',
+                                            padding: '6px 10px',
+                                            background: 'rgba(255,255,255,.08)',
+                                            color: 'rgba(255,255,255,.58)',
+                                            fontSize: '9px',
+                                            letterSpacing: '1.5px',
+                                            textTransform: 'uppercase',
+                                            transition: 'background .2s, color .2s',
+                                        }}>{s.label === 'Books' ? 'Library' : s.label === 'Readers' ? 'Community' : s.label === 'Trades' ? 'Exchange' : s.label === 'Orders' ? 'Delivery' : 'Circles'}</span>
+                                        <span style={{ color: 'rgba(255,193,7,.4)', fontSize: '12px' }}>0{i + 1}</span>
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
                                     <div style={{
                                         fontFamily: "'Fraunces',serif",
-                                        fontSize: 'clamp(24px,3.5vw,42px)', lineHeight: 1,
-                                        color: '#FFC107', marginBottom: '6px',
+                                        fontSize: 'clamp(34px,5vw,56px)', lineHeight: 1,
+                                        color: '#FFC107', marginBottom: '8px',
+                                        textShadow: '0 8px 26px rgba(0,0,0,.65)',
                                     }}><Counter to={s.val}/></div>
-                                    <div style={{ fontSize: '9px', letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,.2)' }}>{s.label}</div>
+                                    <div style={{ fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(255,255,255,.58)' }}>{s.label}</div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -849,56 +929,101 @@ const Home = () => {
 
                 {/* ════════ REVIEWS ════════ */}
                 <section style={{ position: 'relative', zIndex: 10, padding: '0 clamp(36px,6vw,96px) 72px', animation: 'fadeUp .7s .4s ease both' }}>
-                    <div style={{ marginBottom: '32px' }}>
-                        <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.35)', marginBottom: '10px' }}>Readers Say</p>
-                        <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 'clamp(28px,4vw,44px)', fontStyle: 'italic', color: 'var(--white)', lineHeight: 1.1 }}>Reviews</h2>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'end',
+                        justifyContent: 'space-between',
+                        gap: '20px',
+                        marginBottom: '28px',
+                        flexWrap: 'wrap',
+                    }}>
+                        <div>
+                            <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(255,193,7,0.42)', marginBottom: '10px' }}>Readers Say</p>
+                            <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 'clamp(28px,4vw,44px)', fontStyle: 'italic', color: 'var(--white)', lineHeight: 1.1 }}>Reviews</h2>
+                        </div>
+                        <div style={{
+                            border: '1px solid rgba(255,193,7,.18)',
+                            borderRadius: '999px',
+                            padding: '9px 14px',
+                            color: 'rgba(255,255,255,.42)',
+                            fontSize: '11px',
+                            letterSpacing: '1.4px',
+                            textTransform: 'uppercase',
+                            background: 'rgba(255,193,7,.035)',
+                        }}>
+                            {reviews.length} shared note{reviews.length === 1 ? '' : 's'}
+                        </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px' }}>
                         {reviews.length === 0 ? (
                             <div style={{
-                                border: '1px dashed #1a1a1a', borderRadius: '18px',
+                                border: '1px dashed rgba(255,193,7,.2)', borderRadius: '16px',
                                 padding: '64px 24px', textAlign: 'center',
                                 color: 'var(--muted)', fontSize: '14px', gridColumn: '1/-1',
-                                background: '#0a0a0a',
+                                background: 'linear-gradient(135deg, rgba(255,193,7,.055), rgba(10,10,10,.92))',
                             }}>No reviews yet.</div>
                         ) : reviews.map((rv, i) => (
                             <div className="hn-rv-card" key={rv.id || i} style={{
-                                background: '#0a0a0a', border: '1px solid #1a1a1a',
-                                borderRadius: '16px', padding: '22px',
+                                background: 'linear-gradient(180deg, rgba(17,17,17,.98), rgba(7,7,7,.98))',
+                                border: '1px solid rgba(255,255,255,.075)',
+                                borderRadius: '14px', padding: '22px',
                                 position: 'relative', overflow: 'hidden',
+                                minHeight: '230px',
+                                display: 'flex',
+                                flexDirection: 'column',
                                 animation: `fadeUp .5s ${i * .06}s ease both`,
                             }}>
                                 <div style={{
-                                    position: 'absolute', top: '6px', right: '12px',
-                                    fontFamily: 'Georgia,serif', fontSize: '64px', lineHeight: 1,
-                                    color: 'rgba(255,193,7,0.04)', userSelect: 'none',
-                                }}>"</div>
-                                <div style={{ marginBottom: '12px' }}>
+                                    position: 'absolute', top: '14px', right: '16px',
+                                    fontFamily: "'Fraunces',serif", fontSize: '52px', lineHeight: 1,
+                                    color: 'rgba(255,193,7,0.08)', userSelect: 'none',
+                                }}>''</div>
+                                <div className="hn-rv-stars" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '18px', position: 'relative' }}>
                                     {[...Array(5)].map((_, si) => (
                                         <span key={si} style={{
-                                            color: si < (rv.rating || 0) ? '#FFC107' : 'rgba(255,255,255,.07)',
-                                            fontSize: '12px', marginRight: '2px',
+                                            color: si < (rv.rating || 0) ? '#FFC107' : 'rgba(255,255,255,.13)',
+                                            fontSize: '12px',
+                                            transition: 'background .2s, color .2s',
                                         }}>★</span>
                                     ))}
+                                    <div style={{
+                                        marginLeft: '8px',
+                                        fontSize: '10px',
+                                        color: 'rgba(255,193,7,.52)',
+                                        letterSpacing: '1.6px',
+                                        textTransform: 'uppercase',
+                                    }}>
+                                        {rv.rating || 0}/5
+                                    </div>
                                 </div>
                                 {rv.comment && (
                                     <p style={{
-                                        fontFamily: "'Fraunces',serif", fontSize: '15px',
-                                        fontStyle: 'italic', color: 'rgba(255,255,255,.38)',
-                                        lineHeight: '1.8', marginBottom: '18px',
+                                        fontFamily: "'Fraunces',serif", fontSize: '16px',
+                                        fontStyle: 'italic', color: 'rgba(255,255,255,.68)',
+                                        lineHeight: '1.75', marginBottom: '22px',
                                         display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                                     }}>"{rv.comment}"</p>
                                 )}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderTop: '1px solid #1a1a1a', paddingTop: '14px' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '11px',
+                                    borderTop: '1px solid rgba(255,255,255,.07)',
+                                    paddingTop: '15px',
+                                    marginTop: 'auto',
+                                    position: 'relative',
+                                }}>
                                     <div style={{
-                                        width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-                                        background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.12)',
+                                        width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                                        background: 'linear-gradient(135deg, rgba(255,193,7,0.22), rgba(126,184,247,0.1))',
+                                        border: '1px solid rgba(255,193,7,0.24)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontFamily: "'Fraunces',serif", fontSize: '15px', color: '#FFC107',
+                                        boxShadow: '0 0 0 4px rgba(255,193,7,.035)',
                                     }}>{rv.username ? rv.username[0].toUpperCase() : '?'}</div>
                                     <div>
-                                        <div style={{ fontSize: '13px', color: 'var(--white)' }}>{rv.username || 'Anonymous'}</div>
-                                        {rv.bookTitle && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.25)', fontStyle: 'italic' }}>on "{rv.bookTitle}"</div>}
+                                        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.86)', fontWeight: 500 }}>{rv.username || 'Anonymous'}</div>
+                                        {rv.bookTitle && <div style={{ fontSize: '11px', color: 'rgba(126,184,247,.55)', fontStyle: 'italic', marginTop: '2px' }}>on "{rv.bookTitle}"</div>}
                                     </div>
                                 </div>
                             </div>
