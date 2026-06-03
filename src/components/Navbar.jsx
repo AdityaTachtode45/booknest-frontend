@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import axios from "axios";
 import { API_ROOT } from '../config/api';
 
@@ -21,6 +22,7 @@ const Navbar = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
 
   const [scrolled,     setScrolled]     = useState(false);
   const [menuOpen,     setMenuOpen]     = useState(false);
@@ -281,6 +283,42 @@ const Navbar = () => {
           border-radius: 50px;
           font-size: 12px; color: #5dcfc8; cursor: pointer;
           transition: background 0.2s;
+        }
+
+        .nv-cart-btn {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 42px;
+          height: 38px;
+          padding: 0 12px;
+          background: rgba(212,175,55,.1);
+          border: 1px solid rgba(212,175,55,.25);
+          border-radius: 10px;
+          color: #d4af37;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .nv-cart-count {
+          position: absolute;
+          top: -7px;
+          right: -7px;
+          min-width: 20px;
+          height: 20px;
+          padding: 0 6px;
+          border-radius: 999px;
+          background: #d4af37;
+          color: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          line-height: 1;
+          border: 2px solid #050505;
         }
         .nv-admin-badge:hover { background: rgba(5,124,133,0.3); }
 
@@ -559,6 +597,7 @@ const Navbar = () => {
 }
 
 .nv-avatar,
+.nv-cart-btn,
 .nv-admin-badge,
 .nv-btn-login,
 .nv-btn-register {
@@ -611,6 +650,18 @@ const Navbar = () => {
 
 .nv-admin-badge:hover {
   background: rgba(212,175,55,.17) !important;
+}
+
+.nv-cart-btn {
+  background: #0a0a0a !important;
+  border: 1px solid rgba(212,175,55,.18) !important;
+  color: #d4af37 !important;
+}
+
+.nv-cart-btn:hover,
+.nv-cart-btn.active {
+  background: rgba(212,175,55,.11) !important;
+  border-color: rgba(212,175,55,.34) !important;
 }
 
 .nv-dropdown {
@@ -743,6 +794,15 @@ const Navbar = () => {
 
           {/* Actions */}
           <div className="nv-actions">
+            <button
+              className={`nv-cart-btn${isActive('/cart') ? ' active' : ''}`}
+              onClick={() => navigate('/cart')}
+              aria-label={`Cart with ${totalItems} items`}
+            >
+              Cart
+              {totalItems > 0 && <span className="nv-cart-count">{totalItems > 99 ? '99+' : totalItems}</span>}
+            </button>
+
             {user ? (
               <>
                 {/* Admin badge */}

@@ -1,191 +1,260 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getBookById, placeOrder, createPaymentOrder, updateOrderStatus, createDelivery } from '../services/api';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { createDelivery, createPaymentOrder, getBookById, placeOrder, updateOrderStatus, verifyPayment } from '../services/api';
+import { useCart } from '../context/CartContext';
+
+const formatPrice = (value) => `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
 
 const Checkout = () => {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { items: cartItems, clearCart } = useCart();
 
-    const [book,    setBook]    = useState(null);
+    const [directItem, setDirectItem] = useState(null);
     const [address, setAddress] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(Boolean(id));
     const [placing, setPlacing] = useState(false);
-    const [error,   setError]   = useState('');
+    const [error, setError] = useState('');
 
-    useEffect(() => { fetchBook(); }, [id]);
+    useEffect(() => {
+        if (!id) return;
 
-    const fetchBook = async () => {
-        try { const res = await getBookById(id); setBook(res.data); }
-        catch { setError('Book not found.'); }
-        finally { setLoading(false); }
-    };
+        const fetchBook = async () => {
+            setLoading(true);
+            try {
+                const res = await getBookById(id);
+                const qty = Math.min(
+                    Math.max(1, Number(searchParams.get('qty') || 1)),
+                    Math.max(1, Number(res.data.quantity || 1))
+                );
+                setDirectItem({
+                    id: res.data.id,
+                    title: res.data.title,
+                    author: res.data.author,
+                    type: res.data.type,
+                    price: Number((res.data.type === 'RENT' && res.data.rentPrice != null ? res.data.rentPrice : res.data.price) || 0),
+                    imageUrl: res.data.imageUrl,
+                    quantity: qty,
+                    quantityAvailable: Math.max(1, Number(res.data.quantity || 1)),
+                });
+            } catch {
+                setError('Book not found.');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const loadRazorpay = () => new Promise(resolve => {
-        const s = document.createElement('script');
-        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        s.onload = () => resolve(true);
-        s.onerror = () => resolve(false);
-        document.body.appendChild(s);
+        fetchBook();
+    }, [id, searchParams]);
+
+    const checkoutItems = useMemo(() => {
+        if (id) return directItem ? [directItem] : [];
+        return cartItems;
+    }, [cartItems, directItem, id]);
+
+    const totalItems = useMemo(
+        () => checkoutItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+        [checkoutItems]
+    );
+
+    const totalAmount = useMemo(
+        () => checkoutItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0),
+        [checkoutItems]
+    );
+
+    const loadRazorpay = () => new Promise((resolve) => {
+        if (window.Razorpay) {
+            resolve(true);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
     });
 
+    const createBackendOrders = async () => {
+        const createdOrders = [];
+
+        for (const item of checkoutItems) {
+            const orderRes = await placeOrder(item.id, item.type, address, item.quantity);
+            createdOrders.push(orderRes.data);
+            await updateOrderStatus(orderRes.data.id, 'CONFIRMED');
+            await createDelivery(orderRes.data.id);
+        }
+
+        return createdOrders;
+    };
+
     const handlePayment = async () => {
-        if (!address.trim()) { setError('Please enter your delivery address.'); return; }
-        setPlacing(true); setError('');
+        if (checkoutItems.length === 0) {
+            setError('Your cart is empty.');
+            return;
+        }
+        if (!address.trim()) {
+            setError('Please enter your delivery address.');
+            return;
+        }
+        if (totalAmount <= 0) {
+            setError('Payment amount is invalid.');
+            return;
+        }
+
+        setPlacing(true);
+        setError('');
+
         try {
             const loaded = await loadRazorpay();
-            if (!loaded) { setError('Razorpay failed to load.'); return; }
-            const orderRes = await createPaymentOrder(book.price);
+            if (!loaded) throw new Error('Razorpay failed to load.');
+
+            const orderRes = await createPaymentOrder(totalAmount);
             const { orderId, amount, keyId } = orderRes.data;
+
             const options = {
-                key: keyId, amount: amount * 100, currency: 'INR',
-                name: 'BookNest', description: `Payment for ${book.title}`,
+                key: keyId,
+                amount: Number(amount) * 100,
+                currency: 'INR',
+                name: 'BookNest',
+                description: `${totalItems} item${totalItems === 1 ? '' : 's'} from BookNest`,
                 order_id: orderId,
                 handler: async (response) => {
+                    setPlacing(true);
+                    setError('');
                     try {
-                        const o = await placeOrder(id, book.type, address);
-                        await updateOrderStatus(o.data.id, 'CONFIRMED');
-                        await createDelivery(o.data.id);
+                        await verifyPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature);
+                        await createBackendOrders();
+                        if (!id) clearCart();
                         navigate('/my-orders');
-                    } catch (err) { setError(err.response?.data || 'Something went wrong.'); }
+                    } catch (err) {
+                        setError(err.response?.data || err.message || 'Payment completed, but order creation failed. Please contact support.');
+                    } finally {
+                        setPlacing(false);
+                    }
+                },
+                modal: {
+                    ondismiss: () => setPlacing(false),
                 },
                 prefill: { name: 'BookNest User' },
-                theme: { color: '#a07828' }
+                theme: { color: '#d4af37' },
             };
+
             new window.Razorpay(options).open();
-        } catch (err) { setError(err.response?.data || 'Something went wrong.'); }
-        finally { setPlacing(false); }
+        } catch (err) {
+            setError(err.response?.data || err.message || 'Something went wrong.');
+            setPlacing(false);
+        }
     };
 
     return (
         <>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Fraunces:ital,wght@0,600;1,400&display=swap');
-                .co*{box-sizing:border-box;margin:0;padding:0;}
-                .co{min-height:100vh;background:#f7f3ee;font-family:'Inter',sans-serif;color:#1a1610;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px 80px;}
-                .co-box{width:100%;max-width:520px;}
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,600;1,400&display=swap');
 
-                .co-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:rgba(26,22,16,0.38);cursor:pointer;padding:0;margin-bottom:28px;transition:color 0.15s;}
-                .co-back:hover{color:#a07828;}
+                .co{min-height:100vh;background:#000;color:#fff;font-family:'Inter',sans-serif;padding:104px 24px 80px;}
+                .co-wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;}
+                .co-head{max-width:1080px;margin:0 auto 28px;}
+                .co-back{display:inline-flex;background:none;border:none;color:rgba(255,255,255,.52);cursor:pointer;padding:0;margin-bottom:20px;font-size:13px;}
+                .co-back:hover{color:#d4af37;}
+                .co-title{font-family:'Fraunces',serif;font-size:clamp(30px,5vw,46px);font-weight:600;line-height:1;}
+                .co-title span{color:#d4af37;font-style:italic;font-weight:400;}
+                .co-sub{margin-top:10px;color:rgba(255,255,255,.45);font-size:14px;}
+                .co-panel,.co-summary{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;}
+                .co-panel{padding:20px;}
+                .co-items{display:flex;flex-direction:column;gap:12px;}
+                .co-item{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:14px;padding:14px;background:#050505;border:1px solid rgba(255,255,255,.06);border-radius:8px;}
+                .co-img{width:70px;height:94px;border-radius:6px;background:#111;overflow:hidden;border:1px solid #222;display:flex;align-items:center;justify-content:center;color:#333;font-size:12px;}
+                .co-img img{width:100%;height:100%;object-fit:cover;}
+                .co-name{font-family:'Fraunces',serif;font-size:18px;color:#fff;margin-bottom:4px;}
+                .co-author{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:10px;}
+                .co-pill{display:inline-flex;border:1px solid rgba(212,175,55,.18);border-radius:999px;color:#d4af37;padding:4px 10px;font-size:11px;font-weight:800;text-transform:uppercase;}
+                .co-line{text-align:right;color:#d4af37;font-weight:800;white-space:nowrap;}
+                .co-line span{display:block;margin-top:8px;color:rgba(255,255,255,.42);font-size:12px;font-weight:600;}
+                .co-address{margin-top:18px;}
+                .co-label{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:rgba(212,175,55,.68);margin-bottom:10px;}
+                .co-textarea{width:100%;min-height:112px;background:#050505;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;padding:13px 14px;outline:none;resize:vertical;font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;}
+                .co-textarea:focus{border-color:rgba(212,175,55,.44);}
+                .co-err{max-width:1080px;margin:0 auto 18px;padding:13px 16px;border:1px solid rgba(255,69,58,.28);border-radius:8px;background:rgba(255,69,58,.08);color:#ff6b61;font-size:13px;}
+                .co-loading,.co-empty{text-align:center;padding:90px 0;color:#d4af37;}
+                .co-summary{position:sticky;top:88px;padding:22px;}
+                .co-summary h2{font-family:'Fraunces',serif;font-size:24px;margin-bottom:18px;}
+                .co-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;color:rgba(255,255,255,.62);}
+                .co-row strong{color:#fff;}
+                .co-total{font-size:18px;color:#fff;}
+                .co-total strong{color:#d4af37;font-size:22px;}
+                .co-pay{width:100%;margin-top:20px;border:0;background:#d4af37;color:#000;border-radius:8px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;}
+                .co-pay:hover:not(:disabled){background:#f1c40f;}
+                .co-pay:disabled{opacity:.55;cursor:not-allowed;}
+                .co-secondary{width:100%;margin-top:10px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.62);border-radius:8px;padding:12px;font-weight:800;cursor:pointer;}
 
-                .co-title{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:600;color:#1a1610;letter-spacing:-0.5px;line-height:1;margin-bottom:6px;}
-                .co-title span{color:#a07828;font-style:italic;font-weight:400;}
-                .co-sub{font-size:13px;font-weight:300;color:rgba(26,22,16,0.38);margin-bottom:28px;}
-
-                .co-err{padding:12px 16px;border:1px solid rgba(180,60,50,0.2);border-radius:4px;background:rgba(200,60,50,0.05);color:rgba(180,60,50,0.8);font-size:13px;font-weight:300;margin-bottom:20px;}
-
-                .co-loading{text-align:center;padding:80px 0;font-size:14px;font-weight:300;color:rgba(26,22,16,0.3);}
-                .co-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#a07828;margin:0 3px;animation:coB 1.2s ease-in-out infinite;}
-                .co-dot:nth-child(2){animation-delay:0.15s;}.co-dot:nth-child(3){animation-delay:0.3s;}
-                @keyframes coB{0%,80%,100%{transform:scale(0.6);opacity:0.3;}40%{transform:scale(1);opacity:1;}}
-
-                /* Book card */
-                .co-book{display:flex;gap:16px;padding:18px;background:#faf7f2;border:1px solid rgba(160,120,40,0.12);border-radius:4px;margin-bottom:1px;}
-                .co-book-img{width:64px;height:82px;border-radius:2px;overflow:hidden;background:#ede8e0;flex-shrink:0;border:1px solid rgba(160,120,40,0.1);}
-                .co-book-img img{width:100%;height:100%;object-fit:cover;}
-                .co-book-noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;color:rgba(160,120,40,0.2);}
-                .co-book-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-                .co-book-type{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#a07828;margin-bottom:2px;}
-                .co-book-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:#1a1610;line-height:1.2;}
-                .co-book-author{font-size:12px;font-weight:300;color:rgba(26,22,16,0.38);}
-                .co-book-price{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:#a07828;margin-top:4px;}
-
-                /* Summary */
-                .co-summary{border:1px solid rgba(160,120,40,0.12);border-top:none;background:#faf7f2;margin-bottom:1px;}
-                .co-sum-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid rgba(160,120,40,0.07);}
-                .co-sum-row:last-child{border-bottom:none;}
-                .co-sum-label{font-size:13px;font-weight:300;color:rgba(26,22,16,0.45);}
-                .co-sum-value{font-size:13px;font-weight:400;color:rgba(26,22,16,0.7);}
-                .co-sum-free{font-size:13px;font-weight:500;color:#4a8c4a;}
-                .co-sum-total .co-sum-label{font-weight:500;color:#1a1610;font-size:14px;}
-                .co-sum-total .co-sum-value{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:#a07828;}
-
-                /* Address */
-                .co-addr-wrap{border:1px solid rgba(160,120,40,0.12);border-top:none;background:#faf7f2;padding:18px;margin-bottom:20px;}
-                .co-addr-label{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(160,120,40,0.45);margin-bottom:10px;}
-                .co-textarea{width:100%;padding:10px 13px;background:#f7f3ee;border:1px solid rgba(160,120,40,0.16);border-radius:4px;color:#1a1610;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:300;outline:none;resize:vertical;min-height:88px;line-height:1.6;transition:border-color 0.15s,background 0.15s;}
-                .co-textarea::placeholder{color:rgba(26,22,16,0.2);}
-                .co-textarea:focus{border-color:rgba(160,120,40,0.4);background:#f7f3ee;}
-
-                /* Actions */
-                .co-actions{display:flex;gap:10px;}
-                .co-btn-back{padding:12px 20px;background:transparent;border:1px solid rgba(160,120,40,0.22);border-radius:4px;color:rgba(26,22,16,0.5);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:border-color 0.15s,color 0.15s;}
-                .co-btn-back:hover{border-color:rgba(160,120,40,0.4);color:rgba(26,22,16,0.8);}
-                .co-btn-pay{flex:1;padding:13px;background:#a07828;color:#fff;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:background 0.15s,transform 0.15s;}
-                .co-btn-pay:hover:not(:disabled){background:#b5892e;transform:translateY(-1px);}
-                .co-btn-pay:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-
-                @media(max-width:480px){.co{padding:32px 16px 60px;}.co-actions{flex-direction:column;}.co-btn-back{order:2;}.co-btn-pay{order:1;}}
+                @media(max-width:860px){.co-wrap{grid-template-columns:1fr}.co-summary{position:static}.co-item{grid-template-columns:60px minmax(0,1fr)}.co-img{width:60px;height:82px}.co-line{grid-column:1/-1;text-align:left;white-space:normal}}
             `}</style>
 
             <div className="co">
-                <div className="co-box">
-                    <button className="co-back" onClick={() => navigate(`/books/${id}`)}>← Back to book</button>
+                <div className="co-head">
+                    <button className="co-back" onClick={() => navigate(id ? `/books/${id}` : '/cart')}>Back</button>
+                    <h1 className="co-title">Confirm <span>Checkout</span></h1>
+                    <p className="co-sub">Review your books, add delivery address, then complete payment.</p>
+                </div>
 
-                    {loading ? (
-                        <div className="co-loading"><span className="co-dot"/><span className="co-dot"/><span className="co-dot"/></div>
-                    ) : !book ? (
-                        <div className="co-err">Book not found.</div>
-                    ) : (
-                        <>
-                            <h1 className="co-title">Confirm <span>Order</span></h1>
-                            <p className="co-sub">Review your order and enter delivery details.</p>
+                {error && <div className="co-err">{error}</div>}
 
-                            {error && <div className="co-err">{error}</div>}
-
-                            {/* Book */}
-                            <div className="co-book">
-                                <div className="co-book-img">
-                                    {book.imageUrl
-                                        ? <img src={book.imageUrl} alt={book.title} />
-                                        : <div className="co-book-noimg">📚</div>
-                                    }
-                                </div>
-                                <div className="co-book-info">
-                                    <div className="co-book-type">{book.type}</div>
-                                    <div className="co-book-title">{book.title}</div>
-                                    <div className="co-book-author">by {book.author}</div>
-                                    <div className="co-book-price">₹{book.price}</div>
-                                </div>
+                {loading ? (
+                    <div className="co-loading">Loading checkout...</div>
+                ) : checkoutItems.length === 0 ? (
+                    <div className="co-empty">
+                        <p>No books are ready for checkout.</p>
+                        <button className="co-pay" style={{ maxWidth: 220 }} onClick={() => navigate('/books')}>Browse books</button>
+                    </div>
+                ) : (
+                    <div className="co-wrap">
+                        <section className="co-panel">
+                            <div className="co-items">
+                                {checkoutItems.map((item) => (
+                                    <div className="co-item" key={item.id}>
+                                        <div className="co-img">
+                                            {item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : 'Book'}
+                                        </div>
+                                        <div>
+                                            <div className="co-name">{item.title}</div>
+                                            <div className="co-author">by {item.author}</div>
+                                            <span className="co-pill">{item.type === 'SELL' ? 'Buy' : item.type}</span>
+                                        </div>
+                                        <div className="co-line">
+                                            {formatPrice(item.price * item.quantity)}
+                                            <span>{item.quantity} x {formatPrice(item.price)}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Summary */}
-                            <div className="co-summary">
-                                <div className="co-sum-row">
-                                    <span className="co-sum-label">Book price</span>
-                                    <span className="co-sum-value">₹{book.price}</span>
-                                </div>
-                                <div className="co-sum-row">
-                                    <span className="co-sum-label">Delivery</span>
-                                    <span className="co-sum-free">Free</span>
-                                </div>
-                                <div className="co-sum-row co-sum-total">
-                                    <span className="co-sum-label">Total</span>
-                                    <span className="co-sum-value">₹{book.price}</span>
-                                </div>
-                            </div>
-
-                            {/* Address */}
-                            <div className="co-addr-wrap">
-                                <div className="co-addr-label">Delivery Address</div>
+                            <div className="co-address">
+                                <div className="co-label">Delivery Address</div>
                                 <textarea
                                     className="co-textarea"
-                                    placeholder="Enter your full delivery address…"
+                                    placeholder="Enter your complete delivery address"
                                     value={address}
-                                    onChange={e => setAddress(e.target.value)}
-                                    rows="3"
+                                    onChange={(e) => setAddress(e.target.value)}
                                 />
                             </div>
+                        </section>
 
-                            {/* Actions */}
-                            <div className="co-actions">
-                                <button className="co-btn-back" onClick={() => navigate(`/books/${id}`)}>← Back</button>
-                                <button className="co-btn-pay" onClick={handlePayment} disabled={placing}>
-                                    {placing ? 'Processing…' : `💳 Pay ₹${book.price}`}
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                        <aside className="co-summary">
+                            <h2>Payment</h2>
+                            <div className="co-row"><span>Items</span><strong>{totalItems}</strong></div>
+                            <div className="co-row"><span>Delivery</span><strong>Free</strong></div>
+                            <div className="co-row co-total"><span>Total</span><strong>{formatPrice(totalAmount)}</strong></div>
+                            <button className="co-pay" onClick={handlePayment} disabled={placing}>
+                                {placing ? 'Processing...' : `Pay ${formatPrice(totalAmount)}`}
+                            </button>
+                            <button className="co-secondary" onClick={() => navigate(id ? `/books/${id}` : '/cart')}>
+                                Edit order
+                            </button>
+                        </aside>
+                    </div>
+                )}
             </div>
         </>
     );

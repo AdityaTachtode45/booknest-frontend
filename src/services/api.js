@@ -118,9 +118,9 @@ export const deleteBook = (id) => API.delete(`/books/${id}`);
 export const updateBook = (id, formData) => API.put(`/books/${id}`, formData);
 
 // ================= ORDER =================
-export const placeOrder = (bookId, type, address) =>
+export const placeOrder = (bookId, type, address, quantity = 1) =>
     API.post('/orders/place', null, {
-        params: { bookId, type, address }
+        params: { bookId, type, address, quantity }
     });
 
 export const getMyOrders = () => API.get('/orders/my-orders');

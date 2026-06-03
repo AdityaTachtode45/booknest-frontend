@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBookById, deleteBook } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import Reviews from '../components/Reviews';
 
 const typeColor = { SELL: '#d4af37', RENT: '#4a7fa5', EXCHANGE: '#7a68a8' };
@@ -10,10 +11,12 @@ const BookDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user }  = useAuth();
+    const { addToCart } = useCart();
 
     const [book,    setBook]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => { fetchBook(); }, [id]);
 
@@ -27,6 +30,15 @@ const BookDetail = () => {
         if (!window.confirm('Delete this book?')) return;
         try { await deleteBook(id); navigate('/books'); }
         catch (err) { setError(err.response?.data || 'Something went wrong.'); }
+    };
+
+    const handleAddToCart = () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        addToCart(book, quantity);
+        navigate('/cart');
     };
 
     return (
@@ -184,6 +196,43 @@ const BookDetail = () => {
 
                 /* Actions */
                 .bd-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
+                .bd-cart-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                    width: 100%;
+                    flex-wrap: wrap;
+                }
+                .bd-qty {
+                    display: grid;
+                    grid-template-columns: 36px 46px 36px;
+                    height: 38px;
+                    overflow: hidden;
+                    border: 1px solid #262626;
+                    border-radius: 8px;
+                    background: #050505;
+                }
+                .bd-qty button {
+                    border: 0;
+                    background: #111;
+                    color: #fff;
+                    font-size: 18px;
+                    cursor: pointer;
+                }
+                .bd-qty button:disabled { opacity: .35; cursor: not-allowed; }
+                .bd-qty span {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 13px;
+                    font-weight: 700;
+                }
+                .bd-stock {
+                    color: rgba(255,255,255,.45);
+                    font-size: 12px;
+                }
                 .bd-btn-primary {
                     padding: 12px 28px;
                     background: #d4af37;
@@ -287,6 +336,10 @@ const BookDetail = () => {
                                                     : <span className="bd-price">₹{book.price}</span>
                                                 }
                                             </div>
+                                            <div className="bd-row">
+                                                <span className="bd-row-label">Available</span>
+                                                <span className="bd-row-value">{book.quantity || 1}</span>
+                                            </div>
                                             {book.rentPrice && (
                                                 <div className="bd-row">
                                                     <span className="bd-row-label">Rent Price</span>
@@ -309,10 +362,23 @@ const BookDetail = () => {
                                         <div className="bd-actions">
                                             {!isOwner && (
                                                 book.type === 'EXCHANGE'
-                                                    ? <button className="bd-btn-primary" onClick={() => navigate(`/exchange/${book.id}`)}>🔄 Request Exchange</button>
-                                                    : <button className="bd-btn-primary" onClick={() => navigate(`/checkout/${book.id}`)}>
-                                                        {book.type === 'SELL' ? '🛒 Buy Now' : '📅 Rent Now'}
-                                                      </button>
+                                                    ? <button className="bd-btn-primary" onClick={() => navigate(`/exchange/${book.id}`)}>Request Exchange</button>
+                                                    : <>
+                                                        <div className="bd-cart-box">
+                                                            <div className="bd-qty" aria-label="Quantity">
+                                                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={quantity <= 1}>-</button>
+                                                                <span>{quantity}</span>
+                                                                <button onClick={() => setQuantity(q => Math.min(Number(book.quantity || 1), q + 1))} disabled={quantity >= Number(book.quantity || 1)}>+</button>
+                                                            </div>
+                                                            <span className="bd-stock">Choose copies before checkout</span>
+                                                        </div>
+                                                        <button className="bd-btn-primary" onClick={handleAddToCart}>
+                                                            Add to Cart
+                                                        </button>
+                                                        <button className="bd-btn-edit" onClick={() => navigate(`/checkout/${book.id}?qty=${quantity}`)}>
+                                                            Buy Now
+                                                        </button>
+                                                      </>
                                             )}
                                             {isOwner && <>
                                                 <button className="bd-btn-edit" onClick={() => navigate(`/edit-book/${book.id}`)}>✏️ Edit</button>

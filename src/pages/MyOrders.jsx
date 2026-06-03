@@ -146,6 +146,12 @@ const MyOrders = () => {
                     color: #d4af37;
                 }
 
+                .mo-qty {
+                    margin-top: 4px;
+                    color: rgba(255,255,255,.45);
+                    font-size: 12px;
+                }
+
                 .mo-details {
                     background: #050505;
                     border-radius: 8px;
@@ -284,6 +290,7 @@ const MyOrders = () => {
                                             <div className="mo-book-title">{order.book?.title}</div>
                                             <div className="mo-book-author">by {order.book?.author}</div>
                                             <div className="mo-amount">₹{order.amount}</div>
+                                            {order.quantity > 1 && <div className="mo-qty">Quantity: {order.quantity}</div>}
                                         </div>
                                     </div>
 

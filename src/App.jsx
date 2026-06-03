@@ -14,6 +14,7 @@ import MyTickets          from './pages/MyTickets';
 import Books              from './pages/Books';
 import AddBook            from './pages/AddBook';
 import BookDetail         from './pages/BookDetail';
+import Cart               from './pages/Cart';
 import Checkout           from './pages/Checkout';
 import MyOrders           from './pages/MyOrders';
 import TrackOrder         from './pages/TrackOrder';
@@ -1291,6 +1292,8 @@ const App = () => {
                     <Route path="/register"     element={!user ? <Register /> : <Navigate to="/" />} />
                     <Route path="/books"        element={<Books />} />
                     <Route path="/books/:id"    element={<BookDetail />} />
+                    <Route path="/cart"         element={<Cart />} />
+                    <Route path="/checkout"          element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
                     <Route path="/checkout/:id"      element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
                     <Route path="/my-orders"         element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
                     <Route path="/add-book"          element={<ProtectedRoute><AddBook /></ProtectedRoute>} />
