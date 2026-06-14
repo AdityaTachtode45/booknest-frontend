@@ -49,7 +49,36 @@ const AdminDashboard = () => {
     const [deliverySaving, setDeliverySaving] = useState(false);
     const [deliveryError,  setDeliveryError]  = useState('');
     const [deliveryOk,     setDeliveryOk]     = useState(false);
+const [monitor, setMonitor] = useState(null);
+    useEffect(() => {
 
+    const fetchMonitor = async () => {
+
+        try {
+
+            const response = await fetch(
+                `${API}/scheduler-status`
+            );
+
+            const data = await response.json();
+
+            setMonitor(data);
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    fetchMonitor();
+
+    const interval = setInterval(
+        fetchMonitor,
+        5000
+    );
+
+    return () => clearInterval(interval);
+
+}, []);
     useEffect(() => {
         if (!user) return;
         if (user.email !== ADMIN_EMAIL) { navigate('/'); return; }
@@ -684,6 +713,7 @@ const AdminDashboard = () => {
                             { key:'orders',    label:'🛒 Orders'    },
                             { key:'delivery',  label:'🚚 Delivery'  },
                             { key:'messages',  label:'✉️ Messages'  },
+                            { key:'monitor', label:'🟢 Monitor' },
                         ].map(({ key, label }) => (
                             <button key={key} className={`ad-tab${tab === key ? ' act' : ''}`} onClick={() => setTab(key)}>
                                 {{
@@ -693,6 +723,7 @@ const AdminDashboard = () => {
                                     orders: 'Orders',
                                     delivery: 'Delivery',
                                     messages: 'Messages',
+                                    monitor: 'Monitor',
                                 }[key] || label}
                             </button>
                         ))}
@@ -711,7 +742,6 @@ const AdminDashboard = () => {
                         <span className="ad-dot"/><span className="ad-dot"/><span className="ad-dot"/>
                     </div>
                 ) : <>
-
                     {/* ── ANALYTICS ── */}
                     {tab === 'analytics' && (
                         <>
@@ -904,7 +934,46 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     )}
+                         {/* ── Monitor ── */}
+{tab === 'monitor' && (
+    <div className="ad-table-wrap">
 
+        <div className="ad-table-head">
+            <span className="ad-table-title">
+                System Monitor
+            </span>
+        </div>
+
+        <div style={{padding:"30px"}}>
+
+            <h2 style={{color:"#4ade80"}}>
+                🟢 ONLINE
+            </h2>
+
+            <p>
+                Last Run:
+                {monitor?.lastRun}
+            </p>
+
+            <p>
+                Latest Joke:
+            </p>
+
+            <div
+                style={{
+                    background:"#111",
+                    padding:"15px",
+                    borderRadius:"10px",
+                    marginTop:"10px"
+                }}
+            >
+                {monitor?.joke}
+            </div>
+
+        </div>
+
+    </div>
+)}
                     {/* ── MESSAGES ── */}
                     {tab === 'messages' && (
                         <div className="ad-table-wrap">
