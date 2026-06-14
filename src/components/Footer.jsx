@@ -12,9 +12,7 @@ useEffect(() => {
   const fetchStatus = async () => {
     try {
 
-      const response = await fetch(
-        "https://your-render-url.onrender.com/scheduler-status"
-      );
+      const response = await fetch("https://booknest-b.onrender.com/scheduler-status");
 
       const data = await response.json();
 
