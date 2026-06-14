@@ -1,11 +1,37 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const Footer = () => {
   const navigate = useNavigate();
   const { user }  = useAuth();
   const year = new Date().getFullYear();
+  const [jokeData, setJokeData] = useState(null);
+useEffect(() => {
 
+  const fetchStatus = async () => {
+    try {
+
+      const response = await fetch(
+        "https://your-render-url.onrender.com/scheduler-status"
+      );
+
+      const data = await response.json();
+
+      setJokeData(data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchStatus();
+
+  const interval = setInterval(fetchStatus, 5000);
+
+  return () => clearInterval(interval);
+
+}, []);
   return (
     <>
    <style>{`
@@ -19,6 +45,34 @@ const Footer = () => {
   position: relative;
 }
 
+.ft-monitor{
+  margin-top: 30px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,193,7,0.04);
+  border: 1px solid rgba(255,193,7,0.12);
+}
+
+.ft-monitor-title{
+  color:#FFC107;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+
+.ft-monitor-time{
+  color:#ffffff;
+  font-size:12px;
+  margin-bottom:8px;
+}
+
+.ft-monitor-joke{
+  color:rgba(255,255,255,.7);
+  font-size:13px;
+  line-height:1.5;
+}
 /* CONTAINER */
 .ft-inner{
   max-width:1200px;
@@ -214,7 +268,21 @@ const Footer = () => {
               </>}
             </div>
           </div>
+{jokeData && (
+  <div className="ft-monitor">
+    <div className="ft-monitor-title">
+      🟢 BOOKNEST LIVE MONITOR
+    </div>
 
+    <div className="ft-monitor-time">
+      Last Run: {jokeData.lastRun}
+    </div>
+
+    <div className="ft-monitor-joke">
+      {jokeData.joke}
+    </div>
+  </div>
+)}
           <div className="ft-bottom">
             <p className="ft-copy">© {year} <b>BookNest</b>. All Rights Reserved.</p>
             <div className="ft-legal">
